@@ -1,12 +1,10 @@
-use crate::character::CharacterAttribute;
 use crate::character_roll::CharacterRoll;
 use crate::error;
 use crate::intent_parser::parse_intent_result;
 use crate::response::Response;
 use crate::roll;
-use crate::roll::ConditionalRoll;
+use crate::roll::Roll;
 use crate::roll::Error as RollError;
-use crate::weapon::AmbiguousWeaponName;
 use regex::Regex;
 use snips_nlu_lib::SnipsNluEngine;
 use snips_nlu_ontology::IntentParserResult;
@@ -15,28 +13,17 @@ use symspell::{SymSpell, UnicodeStringStrategy};
 
 #[derive(Debug)]
 pub enum Command {
-    AttackRoll(crate::attack_roll::AttackRoll),
     CharacterRoll(crate::character_roll::CharacterRoll),
     Help,
-    HelpShorthand,
-    Roll(crate::roll::ConditionalRoll),
-    Show(CharacterAttribute),
-    ShowAbilities,
-    ShowSkills,
-    ShowWeaponProficiencies,
+    Roll(crate::roll::Roll),
 }
 
 impl Command {
     pub fn description(&self) -> &str {
         match self {
-            Command::AttackRoll(_) => "perform an attack roll",
             Command::CharacterRoll(_) => "perform a character roll",
-            Command::Help | Command::HelpShorthand => "ask for help",
+            Command::Help => "ask for help",
             Command::Roll(_) => "perform a roll",
-            Command::Show(_) => "show a character attribute",
-            Command::ShowAbilities => "show a character's abilities",
-            Command::ShowSkills => "show a character's skills",
-            Command::ShowWeaponProficiencies => "show a character's weapon proficiencies",
         }
     }
 }
@@ -50,20 +37,9 @@ pub enum Error {
     // Natural language commands
     IntentParserError(::failure::Error),
     NoIntent,
-    RollAbilityMissingAbility,
-    RollAttackAmbiguousWeapon(AmbiguousWeaponName),
-    RollAttackMissingClassification,
-    RollAttackMissingHandedness,
-    RollAttackMissingWeapon,
-    RollDiceMissingSides,
-    RollDiceInvalid(RollError, usize, i32),
-    RollSavingThrowMissingAbility,
-    RollSkillMissingSkill,
-    ShowAbilityMissingAbility,
-    ShowPassiveAbilityMissingAbility,
-    ShowPassiveSkillMissingSkill,
-    ShowSavingThrowMissingAbility,
-    ShowSkillMissingSkill,
+    RollDiceInvalid(RollError, usize),
+    RollResistanceMissingAttribute,
+    RollActionMissingAction,
     UnknownIntent(String),
 }
 
@@ -85,60 +61,21 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::CharacterRollParserError => {
-                write!(f, "It looks like you're trying to roll a skill or ability check, but the syntax is invalid. Try typing `!help` for some examples.")
+                write!(f, "It looks like you're trying to roll an action or resistance roll, but the syntax is invalid. Try typing `!help` for some examples.")
             }
             Error::RollParserError(error) => {
                 write!(f, "It looks like you're trying to some dice, but the syntax is invalid. {} Try typing `!help` for some examples.", error)
             }
-            Error::RollAbilityMissingAbility => {
-                write!(f, "It looks like you're trying to roll an ability check, but I'm not sure which ability you want. Try \"Roll strength\", \"Dexterity check\", etc.")
-            }
-            Error::RollAttackAmbiguousWeapon(ambiguous_weapon) => {
-                write!(f, "It looks like you're trying to roll an attack check with a {}, but that is an ambiguous weapon name. {}", ambiguous_weapon, ambiguous_weapon.message())
-            }
-            Error::RollAttackMissingClassification => {
-                write!(f, "It looks like you're trying to roll an attack check with an improvised weapon, but I'm not sure whether it should be a melee or ranged attack. Try \"Attack improvised weapon as melee\", \"Roll ranged improvised weapon check\", etc.")
-            }
-            Error::RollAttackMissingHandedness => {
-                write!(f, "It looks like you're trying to roll an attack check with a weapon that has the versatile property, but I'm not sure whether you want to attack with one hand or two hands. Try \"One-handed attack quarterstaff\", \"Roll longsword weapon check with two hands\", etc.")
-            }
-            Error::RollAttackMissingWeapon => {
-                write!(f, "It looks like you're trying to roll an attack check, but I'm not sure which weapon you want to attack with. Try \"Attack club\", \"Dagger attack\", etc.")
-            }
-            Error::RollDiceMissingSides => {
-                write!(f, "It looks like you're trying to roll some dice, but I'm not sure what kind of dice you want. Try \"Roll a d20\", \"Throw two four-sided dice\", etc.")
-            }
-            Error::RollDiceInvalid(error, rolls, sides) => match error {
+            Error::RollDiceInvalid(error, rolls) => match error {
                 RollError::RollsTooGreat => {
                     write!(f, "It looks like you're trying to roll {} dice. That's too many dice! Try rolling 100 or fewer dice.", rolls)
-                }
-                RollError::SidesNonPositive => {
-                    write!(f, "It looks like you're trying to roll dice with {} sides. I can only roll a positive number of sides. Try rolling dice with one or more sides.", sides)
-                }
-                RollError::SidesTooGreat => {
-                    write!(f, "It looks like you're trying to roll dice with {} sides. That's too many sides! Try rolling dice with 100 or fewer sides.", sides)
-                }
+                },
             }
-            Error::RollSavingThrowMissingAbility => {
-                write!(f, "It looks like you're trying to roll a saving throw, but I'm not sure what kind of saving throw you want. Try \"Roll strength saving throw\", \"Dexterity saving throw\", etc.")
+            Error::RollResistanceMissingAttribute => {
+                write!(f, "It looks like you're trying to roll a resistance roll, but I'm not sure what kind of resistance roll you want. Try \"Roll insight resistance roll\", \"Resolve resistance roll\", etc.")
             }
-            Error::RollSkillMissingSkill => {
-                write!(f, "It looks like you're trying to roll a skill check, but I'm not sure what skill you want. Try \"Roll stealth\", \"Athletics check\", etc.")
-            }
-            Error::ShowAbilityMissingAbility => {
-                write!(f, "It looks like you're trying to view an ability score, but I'm not sure what ability you want. Try \"Show strength\", \"Display dexterity\", etc.")
-            }
-            Error::ShowPassiveAbilityMissingAbility => {
-                write!(f, "It looks like you're trying to view a passive ability score, but I'm not sure what ability you want. Try \"Show passive strength\", \"Display passive dexterity\", etc.")
-            }
-            Error::ShowPassiveSkillMissingSkill => {
-                write!(f, "It looks like you're trying to view a passive skill score, but I'm not sure what skill you want. Try \"Show passive athletics\", \"Display passive stealth\", etc.")
-            }
-            Error::ShowSavingThrowMissingAbility => {
-                write!(f, "It looks like you're trying to view a saving throw modifier, but I'm not sure what ability you want. Try \"Show strength saving throw\", \"Display passive saving throw\", etc.")
-            }
-            Error::ShowSkillMissingSkill => {
-                write!(f, "It looks like you're trying to view a skill modifier, but I'm not sure what skill you want. Try \"Show athletics\", \"Display stealth\", etc.")
+            Error::RollActionMissingAction => {
+                write!(f, "It looks like you're trying to roll an action check, but I'm not sure what action you want. Try \"Roll command\", \"Hacking roll\", etc.")
             }
             Error::NoIntent => {
                 write!(f, "I'm not sure what you mean. Try asking again with a different or simpler phrasing. Try asking for help to see some examples.")
@@ -159,7 +96,7 @@ type NaturalLanguageCommandResult =
 impl Command {
     pub fn is_private(&self) -> bool {
         match self {
-            Command::Help | Command::HelpShorthand | Command::Roll(_) => true,
+            Command::Help | Command::Roll(_) => true,
             _ => false,
         }
     }
@@ -236,11 +173,11 @@ impl Command {
         }
 
         if command == "!help" {
-            Some(Ok(Command::HelpShorthand))
+            Some(Ok(Command::Help))
         } else if let Some(captures) = ROLL_COMMAND_REGEX.captures(&command) {
             let roll_command = captures.get(1).map_or("", |m| m.as_str()).to_owned();
             Some(
-                ConditionalRoll::parse(&roll_command)
+                Roll::parse(&roll_command)
                     .map(Command::Roll)
                     .map_err(Error::RollParserError)
                     .or_else(|_| {

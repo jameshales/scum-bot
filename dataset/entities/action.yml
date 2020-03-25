@@ -1,0 +1,20 @@
+type: entity
+name: action
+automatically_extensible: false
+matching_strictness: 0.8
+values:
+  - - attune
+    - attuning
+    - attunement
+  - - command
+    - commanding
+  - - consort
+    - consorting
+  - - doctor
+    - doctoring
+  - - hack
+    - hacking
+  - - helm
+    - helming
+  - - rig
+    - rigging

@@ -1,0 +1,95 @@
+type: intent
+name: rollResistance
+slots:
+  - name: attribute
+    entity: attribute
+utterances:
+  - "[attribute] resist."
+  - "[attribute] resistance roll."
+  - Can you do a [attribute] resist?
+  - Can you do a [attribute] resistance roll?
+  - Can you please throw me a [attribute] resist please?
+  - Can you please throw me a [attribute] resist?
+  - Can you please throw me a [attribute] resistance roll please?
+  - Can you please throw me a [attribute] resistance roll?
+  - Can you roll a [attribute] resist for me?
+  - Can you roll a [attribute] resist?
+  - Can you roll a [attribute] resistance roll for me?
+  - Can you roll a [attribute] resistance roll?
+  - Can you throw me [attribute] resist please?
+  - Can you throw me [attribute] resist?
+  - Can you throw me [attribute] resistance roll please?
+  - Can you throw me [attribute] resistance roll?
+  - Check [attribute] resist.
+  - Check [attribute] resistance roll.
+  - Could you throw a [attribute] resist for me please?
+  - Could you throw a [attribute] resistance roll for me please?
+  - Do a [attribute] resist.
+  - Do a [attribute] resistance roll.
+  - Do a [attribute] resistance roll.
+  - Do a resist for [attribute].
+  - Do a resist.
+  - Do a resistance roll for [attribute].
+  - Do a resistance roll.
+  - I need you to throw a [attribute] resist.
+  - I need you to throw a [attribute] resistance roll.
+  - I need you to throw me a [attribute] resist.
+  - I need you to throw me a [attribute] resistance roll.
+  - Perform a [attribute] resist.
+  - Perform a [attribute] resistance roll.
+  - Perform a resist.
+  - Perform a resist..
+  - Perform a resistance roll.
+  - Perform a resistance roll..
+  - Perform an resist with [attribute].
+  - Perform an resist.
+  - Perform an resistance roll with [attribute].
+  - Perform an resistance roll.
+  - Please can you throw me a [attribute] resist?
+  - Please can you throw me a [attribute] resistance roll?
+  - Please do a [attribute] resist.
+  - Please do a [attribute] resistance roll.
+  - Please throw a [attribute] resist.
+  - Please throw a [attribute] resistance roll.
+  - Please throw me a [attribute] resist.
+  - Please throw me a [attribute] resistance roll.
+  - Roll a [attribute] resist.
+  - Roll a [attribute] resistance roll.
+  - Roll a resist for [attribute].
+  - Roll a resist.
+  - Roll a resistance roll for [attribute].
+  - Roll a resistance roll.
+  - Roll for [attribute] resist.
+  - Roll for [attribute] resistance roll.
+  - Roll for a resist.
+  - Roll for a resistance roll.
+  - Roll resist.
+  - Roll resistance roll.
+  - Resist [attribute].
+  - Resist for [attribute].
+  - Resist.
+  - Resistance roll [attribute].
+  - Resistance roll an attribute.
+  - Resistance roll for [attribute].
+  - Resistance roll.
+  - Throw a [attribute] resist.
+  - Throw a [attribute] resistance roll.
+  - Throw a resist.
+  - Throw a resistance roll.
+  - Throw for [attribute] resist.
+  - Throw for [attribute] resistance roll.
+  - Throw for a resist.
+  - Throw for a resistance roll.
+  - Throw for an resist.
+  - Throw for an resistance roll.
+  - Time to roll a [attribute] resist.
+  - Time to roll a [attribute] resistance roll.
+  - Will you roll [attribute] resist for me?
+  - Will you roll [attribute] resistance roll for me?
+  - Will you roll a [attribute] resist for me?
+  - Will you roll a [attribute] resistance roll for me?
+  - Will you roll a [attribute]?
+  - Would you kindly throw me a [attribute] resist?
+  - Would you kindly throw me a [attribute] resistance roll?
+  - Would you throw me a [attribute] resist?
+  - Would you throw me a [attribute] resistance roll?

@@ -1,7 +1,8 @@
 type: entity
-name: condition
+name: attribute
 automatically_extensible: false
 matching_strictness: 0.8
 values:
-  - advantage
-  - disadvantage
+  - insight
+  - prowess
+  - resolve

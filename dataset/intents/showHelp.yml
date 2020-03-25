@@ -6,14 +6,11 @@ utterances:
   - Give me instructions.
   - Give me some example commands.
   - Give me some examples.
-  - Help me do a saving throw.
-  - Help me do a skill check.
-  - Help me do a skill check.
-  - Help me do a skill roll.
-  - Help me do a skill throw.
-  - Help me do an ability check.
-  - Help me do an ability check.
-  - Help me do an ability roll.
+  - Help me do a resistance roll.
+  - Help me do an action roll.
+  - Help me do an action check.
+  - Help me do an action roll.
+  - Help me do an action throw.
   - Help me do an initiative check.
   - Help me do an initiative roll.
   - Help me do an initiative throw.
@@ -23,17 +20,14 @@ utterances:
   - Help me?
   - Help.
   - Help?
-  - How can I do a skill check?
-  - How can I do a skill roll?
-  - How can I do a skill throw?
-  - How do I do a saving throw?
-  - How do I do an ability check?
-  - How do I do an ability roll?
-  - How do I do an ability throw?
+  - How can I do an action check?
+  - How can I do an action roll?
+  - How can I do an action throw?
+  - How do I do a resistance roll?
   - How do I do an initiative check?
   - How do I do an initiative roll?
   - How do I do an initiative throw?
-  - How do I roll a saving throw?
+  - How do I roll a resistance roll?
   - How do I roll dice?
   - How do I roll for initiative?
   - How do I throw dice?
@@ -42,7 +36,6 @@ utterances:
   - How do I use you?
   - I don't understand.
   - I need help using you.
-  - Let me know how to do an ability check.
   - Show help.
   - Show me instructions.
   - Show some example commands.

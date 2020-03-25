@@ -1,0 +1,66 @@
+type: intent
+name: rollAction
+slots:
+  - name: action
+    entity: action
+utterances:
+  - "[action] roll."
+  - "[action]."
+  - Can you do a [action] roll?
+  - Can you please throw me [action] please?
+  - Can you please throw me [action]?
+  - Can you roll [action] for me?
+  - Can you roll [action]?
+  - Can you throw me [action] please?
+  - Can you throw me [action]?
+  - Roll [action].
+  - Roll an action.
+  - Roll action.
+  - Could you throw [action] for me please?
+  - Do a [action] roll.
+  - Do a [action] roll.
+  - Do a [action] action roll.
+  - Do a roll.
+  - Do a action roll for [action].
+  - Do a action roll.
+  - Do an action roll.
+  - I need you to throw [action].
+  - I need you to throw me [action].
+  - Perform a [action] roll.
+  - Perform a action roll.
+  - Perform an action roll with [action].
+  - Perform an action roll.
+  - Please can you throw me [action]?
+  - Please do a [action] roll.
+  - Please throw a [action] action roll.
+  - Please throw me [action].
+  - Roll [action].
+  - Roll a [action] roll.
+  - Roll a action roll for [action].
+  - Roll a action.
+  - Roll an action roll for [action].
+  - Roll an action roll.
+  - Roll an action.
+  - Roll for [action].
+  - Roll for a action.
+  - Roll for an action.
+  - Roll action.
+  - Action roll [action].
+  - Action roll.
+  - Throw [action].
+  - Throw a [action] roll.
+  - Throw a [action] action roll.
+  - Throw a action roll.
+  - Throw a action.
+  - Throw an action roll.
+  - Throw for [action].
+  - Throw for a action.
+  - Throw for an action.
+  - Time to roll a [action] roll.
+  - Time to roll a [action] action roll.
+  - Time to roll for [action].
+  - Time to roll with [action].
+  - Will you roll [action] for me?
+  - Will you roll [action]?
+  - Would you kindly throw me [action]?
+  - Would you throw me [action]?

@@ -1,17 +1,15 @@
-use crate::attack_roll::{AttackRoll, Handedness, ImprovisedWeaponAttackRoll, WeaponAttackRoll};
 use crate::channel::Channel;
-use crate::character::{Ability, Character, CharacterAttribute, SavingThrow, Skill};
+use crate::character::Character;
 use crate::character_roll::CharacterRoll;
 use crate::command;
 use crate::command::{Command, CommandResult};
 use crate::error::Error;
 use crate::intent_logger::log_intent_result;
 use crate::response::Response;
-use crate::roll::{ConditionalRoll, Critical};
+use crate::roll::Roll;
 use log::{error, info};
-use r2d2::{Pool, PooledConnection};
+use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
-use rusqlite::Result as RusqliteResult;
 use snips_nlu_lib::SnipsNluEngine;
 use snips_nlu_ontology::IntentParserResult;
 use std::convert::identity;
@@ -28,10 +26,11 @@ use serenity::{
 };
 
 const CHARACTER_NOT_FOUND_WARNING_TEXT: &str =
-    "Couldn't find any attributes for character. Try setting some ability scores and a character level first.";
+    "Couldn't find any entry for character.";
 
-const ABILITY_NOT_SET_WARNING_TEXT: &str =
-    "Couldn't find required ability scores for character. Try setting some ability scores and a character level first.";
+// TODO Remove this, attributes are not optional
+const ATTRIBUTE_NOT_SET_WARNING_TEXT: &str =
+    "Couldn't find required attribute ratings for character.";
 
 enum Action {
     IgnoreChannelDisabled,
@@ -108,17 +107,9 @@ impl Handler {
 
     fn run_command(&self, command: Command, channel_id: ChannelId, author_id: UserId) -> Response {
         match command {
-            Command::AttackRoll(roll) => self.attack_roll(&roll, channel_id, author_id),
             Command::CharacterRoll(roll) => self.character_roll(&roll, channel_id, author_id),
             Command::Help => Handler::help(),
-            Command::HelpShorthand => Handler::help_shorthand(),
             Command::Roll(roll) => Handler::roll(roll),
-            Command::Show(attribute) => self.show(&attribute, channel_id, author_id),
-            Command::ShowAbilities => self.show_abilities(channel_id, author_id),
-            Command::ShowSkills => self.show_skills(channel_id, author_id),
-            Command::ShowWeaponProficiencies => {
-                self.show_weapon_proficiencies(channel_id, author_id)
-            }
         }
     }
 
@@ -138,80 +129,6 @@ impl Handler {
                     )
             })
             .unwrap_or(())
-    }
-
-    fn attack_roll(
-        &self,
-        attack_roll: &AttackRoll,
-        channel_id: ChannelId,
-        author_id: UserId,
-    ) -> Response {
-        self.pool
-            .get()
-            .map_err(|error| Response::Error(Error::R2D2Error(error)))
-            .and_then(|connection| {
-                Character::get(&connection, channel_id, author_id)
-                    .map_err(|error| Response::Error(Error::RusqliteError(error)))
-                    .and_then(|character| character.map_or(
-                        Err(Response::Warning(CHARACTER_NOT_FOUND_WARNING_TEXT.to_owned())),
-                        |character| {
-                            match attack_roll {
-                                AttackRoll::Weapon(attack_roll) => {
-                                    Character::has_weapon_proficiency(
-                                        &connection,
-                                        channel_id,
-                                        author_id,
-                                        attack_roll.weapon,
-                                        attack_roll.weapon.to_weapon().category,
-                                    )
-                                    .map(|proficiency| (character, proficiency))
-                                    .map_err(|error| Response::Error(Error::RusqliteError(error)))
-                                }
-                                _ => Ok((character, false))
-                            }
-                        })
-                    )
-            })
-            .and_then(|(character, proficiency)| {
-                let strength = character.strength().map(|a| a.modifier);
-                let dexterity = character.dexterity().map(|a| a.modifier);
-                let proficiency_bonus = character.proficiency_bonus();
-                let mut rng = rand::thread_rng();
-                let attack_roll_roll = attack_roll
-                    .to_attack_roll(strength, dexterity, proficiency_bonus, proficiency, character.martial_arts())
-                    .ok_or_else(|| Response::Warning(ABILITY_NOT_SET_WARNING_TEXT.to_owned()))?;
-                let attack_result = attack_roll_roll.roll(&mut rng);
-                let critical_hit = attack_result.critical() == Some(Critical::Success);
-                let damage_roll = attack_roll.to_damage_roll(strength, dexterity, proficiency_bonus, proficiency, critical_hit, character.martial_arts_damage_die()).ok_or_else(|| Response::Warning(ABILITY_NOT_SET_WARNING_TEXT.to_owned()))?;
-                let damage_result = damage_roll.roll(&mut rng);
-                Ok((attack_roll_roll, attack_result, damage_roll, damage_result))
-            })
-            .map(|(attack_roll_roll, attack_result, damage_roll, damage_result)| {
-                let attack_name = match attack_roll {
-                    AttackRoll::ImprovisedWeapon(ImprovisedWeaponAttackRoll { classification, .. }) => format!("improvised weapon (as {})", classification),
-                    AttackRoll::UnarmedStrike(_) => "unarmed strike".to_owned(),
-                    AttackRoll::Weapon(WeaponAttackRoll { classification: Some(classification), weapon, .. }) => format!("{} (as {})", weapon, classification),
-                    AttackRoll::Weapon(WeaponAttackRoll { classification: None, weapon, .. }) => weapon.to_string(),
-                };
-                let attack_handedness = match attack_roll {
-                    AttackRoll::Weapon(WeaponAttackRoll { handedness: Some(handedness), weapon, .. }) if weapon.to_weapon().versatile.is_some() =>
-                        match handedness {
-                            Handedness::OneHanded => " one handed",
-                            Handedness::TwoHanded => " two handed",
-                        }
-                    _ => "",
-                };
-                Response::DiceRoll(format!(
-                    "attacked{} with {} to hit armour class ({}) = 🛡️ {}; and dealing damage ({}) = ❤️ {}",
-                    attack_handedness,
-                    attack_name,
-                    attack_roll_roll,
-                    attack_result,
-                    damage_roll,
-                    damage_result
-                ))
-            })
-            .unwrap_or_else(identity)
     }
 
     fn character_roll(
@@ -234,7 +151,7 @@ impl Handler {
             .and_then(|character| {
                 character_roll
                     .to_roll(&character)
-                    .ok_or_else(|| Response::Warning(ABILITY_NOT_SET_WARNING_TEXT.to_owned()))
+                    .ok_or_else(|| Response::Warning(ATTRIBUTE_NOT_SET_WARNING_TEXT.to_owned()))
             })
             .map(|roll| {
                 let mut rng = rand::thread_rng();
@@ -250,241 +167,17 @@ impl Handler {
     fn help() -> Response {
         Response::Help(
             "Try typing the following:\n\
-             • \"Roll three d8s\"\n\
-             • \"Throw two twelve-sided dice\"\n\
-             • \"Do a strength check with advantage\"\n\
-             • \"Perform a wisdom saving throw\"\n\
-             • \"Try a stealth roll with disadvantage\"\n\
-             • \"Roll for initiative\"\n\
-             There are also short-hand commands you can use. Type \"!help\" for more info."
+             • \"Roll three dice\"\n\
+             • \"Do a hacking roll\"\n\
+             • \"Perform an insight resistance roll\""
                 .to_owned(),
         )
     }
 
-    fn help_shorthand() -> Response {
-        Response::Help(
-            "Try typing the following:\n\
-             • \"!r 3d8\"\n\
-             • \"!r 2d12+3\"\n\
-             • \"!r strength with advantage\"\n\
-             • \"!r wisdom saving throw\"\n\
-             • \"!r stealth with disadvantage\"\n\
-             • \"!r initiative\"\n\
-             There are also natural language commands you can use. Type \"help\" for more info."
-                .to_owned(),
-        )
-    }
-
-    fn roll(roll: ConditionalRoll) -> Response {
+    fn roll(roll: Roll) -> Response {
         let mut rng = rand::thread_rng();
         let result = roll.roll(&mut rng);
         Response::DiceRoll(format!("rolled {} = {}", roll, result))
-    }
-
-    fn with_connection<
-        F: FnOnce(PooledConnection<SqliteConnectionManager>) -> RusqliteResult<Response>,
-    >(
-        &self,
-        f: F,
-    ) -> Response {
-        self.pool
-            .get()
-            .map_err(|error| Response::Error(Error::R2D2Error(error)))
-            .and_then(|connection| {
-                f(connection).map_err(|error| Response::Error(Error::RusqliteError(error)))
-            })
-            .unwrap_or_else(identity)
-    }
-
-    fn show(
-        &self,
-        attribute: &CharacterAttribute,
-        channel_id: ChannelId,
-        author_id: UserId,
-    ) -> Response {
-        self.with_connection(|connection| {
-            Character::get(&connection, channel_id, author_id).map(|character| {
-                character.map_or(
-                    Response::Warning(CHARACTER_NOT_FOUND_WARNING_TEXT.to_owned()),
-                    |character| Response::Show(Handler::show_attribute(&character, attribute)),
-                )
-            })
-        })
-    }
-
-    fn show_attribute(character: &Character, attribute: &CharacterAttribute) -> String {
-        match attribute {
-            CharacterAttribute::Ability(ability) => format!(
-                "{} = {}",
-                ability.as_str(),
-                Handler::format_ability(character.ability(*ability))
-            ),
-            CharacterAttribute::Initiative => format!(
-                "Initiative = {}",
-                character
-                    .dexterity()
-                    .map_or("?".to_owned(), |v| format!("{:+}", v.modifier))
-            ),
-            CharacterAttribute::JackOfAllTrades => format!(
-                "Jack of All Trades = {}",
-                if character.jack_of_all_trades() {
-                    "Yes"
-                } else {
-                    "No"
-                }
-            ),
-            CharacterAttribute::Level => format!(
-                "Level = {}",
-                character.level().map_or("?".to_owned(), |v| v.to_string())
-            ),
-            CharacterAttribute::PassiveAbility(ability) => format!(
-                "Passive {} = {}",
-                ability.as_str(),
-                character
-                    .passive_ability(*ability)
-                    .map_or("?".to_owned(), |v| v.to_string())
-            ),
-            CharacterAttribute::PassiveSkill(skill) => format!(
-                "Passive {} = {}",
-                skill.as_str(),
-                character
-                    .passive_skill(*skill)
-                    .map_or("?".to_owned(), |v| v.to_string())
-            ),
-            CharacterAttribute::SavingThrow(ability) => format!(
-                "{} saving throw = {}",
-                ability.as_str(),
-                Handler::format_saving_throw(character.saving_throw(*ability))
-            ),
-            CharacterAttribute::Skill(skill) => format!(
-                "{} = {}",
-                skill.as_str(),
-                Handler::format_skill(character.skill(*skill))
-            ),
-        }
-    }
-
-    fn show_abilities(&self, channel_id: ChannelId, author_id: UserId) -> Response {
-        self.with_connection(|connection| {
-            Character::get(&connection, channel_id, author_id).map(|character| {
-                character.map_or(
-                    Response::Warning(CHARACTER_NOT_FOUND_WARNING_TEXT.to_owned()),
-                    |character| {
-                        Response::Show(format!(
-                            "\n\
-                             STR = {}\n\
-                             DEX = {}\n\
-                             CON = {}\n\
-                             INT = {}\n\
-                             WIS = {}\n\
-                             CHA = {}",
-                            Handler::format_ability(character.strength()),
-                            Handler::format_ability(character.dexterity()),
-                            Handler::format_ability(character.constitution()),
-                            Handler::format_ability(character.intelligence()),
-                            Handler::format_ability(character.wisdom()),
-                            Handler::format_ability(character.charisma()),
-                        ))
-                    },
-                )
-            })
-        })
-    }
-
-    fn show_skills(&self, channel_id: ChannelId, author_id: UserId) -> Response {
-        self.with_connection(|connection| {
-            Character::get(&connection, channel_id, author_id).map(|character| {
-                character.map_or(
-                    Response::Warning(CHARACTER_NOT_FOUND_WARNING_TEXT.to_owned()),
-                    |character| {
-                        Response::Show(format!(
-                            "\n\
-                             Acrobatics = {}\n\
-                             Animal Handling = {}\n\
-                             Arcana = {}\n\
-                             Athletics = {}\n\
-                             Deception = {}\n\
-                             History = {}\n\
-                             Insight = {}\n\
-                             Intimidation = {}\n\
-                             Investigation = {}\n\
-                             Medicine = {}\n\
-                             Nature = {}\n\
-                             Perception = {}\n\
-                             Performance = {}\n\
-                             Persuasion = {}\n\
-                             Religion = {}\n\
-                             Sleight of Hand = {}\n\
-                             Stealth = {}\n\
-                             Survival = {}",
-                            Handler::format_skill(character.acrobatics()),
-                            Handler::format_skill(character.animal_handling()),
-                            Handler::format_skill(character.arcana()),
-                            Handler::format_skill(character.athletics()),
-                            Handler::format_skill(character.deception()),
-                            Handler::format_skill(character.history()),
-                            Handler::format_skill(character.insight()),
-                            Handler::format_skill(character.intimidation()),
-                            Handler::format_skill(character.investigation()),
-                            Handler::format_skill(character.medicine()),
-                            Handler::format_skill(character.nature()),
-                            Handler::format_skill(character.perception()),
-                            Handler::format_skill(character.performance()),
-                            Handler::format_skill(character.persuasion()),
-                            Handler::format_skill(character.religion()),
-                            Handler::format_skill(character.sleight_of_hand()),
-                            Handler::format_skill(character.stealth()),
-                            Handler::format_skill(character.survival()),
-                        ))
-                    },
-                )
-            })
-        })
-    }
-
-    fn show_weapon_proficiencies(&self, channel_id: ChannelId, author_id: UserId) -> Response {
-        self.with_connection(|connection| {
-            Character::get_weapon_proficiencies(&connection, channel_id, author_id).map(|weapons| {
-                Response::Show(format!(
-                    "Weapon proficiencies: {}",
-                    if !weapons.is_empty() {
-                        weapons
-                            .iter()
-                            .map(|weapon_name| weapon_name.to_string())
-                            .collect::<Vec<String>>()
-                            .join(", ")
-                    } else {
-                        "None".to_owned()
-                    }
-                ))
-            })
-        })
-    }
-
-    fn format_ability(ability: Option<Ability>) -> String {
-        ability.map_or("?".to_owned(), |a| {
-            format!("{:+} ({})", a.modifier, a.score)
-        })
-    }
-
-    fn format_saving_throw(saving_throw: Option<SavingThrow>) -> String {
-        saving_throw.map_or("?".to_owned(), |s| {
-            format!(
-                "{:+} ({})",
-                s.modifier,
-                if s.proficiency {
-                    "Proficient"
-                } else {
-                    "Normal"
-                }
-            )
-        })
-    }
-
-    fn format_skill(skill: Option<Skill>) -> String {
-        skill.map_or("?".to_owned(), |s| {
-            format!("{:+} ({})", s.modifier, s.proficiency.as_str())
-        })
     }
 
     fn get_channel(&self, channel_id: ChannelId) -> Channel {
