@@ -1,14 +1,14 @@
 version: '3.3'
 services:
-  dungeon-helper:
+  scum-bot:
     build:
       context: .
       dockerfile: Dockerfile.local
     environment:
-    - DATABASE_PATH=/opt/dungeon-helper/var/data/dungeon-helper.db
+    - DATABASE_PATH=/opt/scum-bot/var/data/scum-bot.db
     - DISCORD_TOKEN
-    - MODEL_PATH=/opt/dungeon-helper/share/model
-    - RUST_LOG=dungeon-helper=INFO
+    - MODEL_PATH=/opt/scum-bot/share/model
+    - RUST_LOG=scum-bot=INFO
     volumes:
-    - ${PWD}/model/:/opt/dungeon-helper/share/model/
-    - ${PWD}/data/:/opt/dungeon-helper/var/data/
+    - ${PWD}/model/:/opt/scum-bot/share/model/
+    - ${PWD}/data/:/opt/scum-bot/var/data/

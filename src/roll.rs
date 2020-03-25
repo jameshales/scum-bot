@@ -14,7 +14,7 @@ pub const MAXIMUM_ROLLS_DISPLAY: usize = 10;
 /// The maximum number of sides a die may have.
 pub const MAXIMUM_SIDES: i32 = 100;
 
-/// A dice roll that might occur in Dungeons and Dragons 5th edition.
+/// A dice roll that might occur in Scum and Villainy.
 ///
 /// A dice roll involves rolling a number of dice, each with a number of sides. The sum of the
 /// rolled dice is added to the modifier, which may be positive or negative.
@@ -213,7 +213,7 @@ impl Roll {
         self.modifier
     }
 
-    /// Parse a roll from a String using conventional Dungeons and Dragons syntax.
+    /// Parse a roll from a String using conventional Scum and Villainy syntax.
     pub fn parse(string: &str) -> Result<Roll, ParserError> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"^(\d+)d(\d+)(?: ?(\+|-) ?(\d+))?$").unwrap();
@@ -335,7 +335,7 @@ impl ConditionalRoll {
         ConditionalRoll { roll, condition }
     }
 
-    /// Parse a roll from a String using conventional Dungeons and Dragons syntax.
+    /// Parse a roll from a String using conventional Scum and Villainy syntax.
     pub fn parse(string: &str) -> Result<ConditionalRoll, ParserError> {
         lazy_static! {
             static ref RE: Regex =

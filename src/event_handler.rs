@@ -130,11 +130,11 @@ impl Handler {
     ) {
         self.pool
             .get()
-            .map_err(|error| error!(target: "dungeon-helper", "Error obtaining database connection. Message ID: {}; Error: {}", message.id, error))
+            .map_err(|error| error!(target: "scum-bot", "Error obtaining database connection. Message ID: {}; Error: {}", message.id, error))
             .and_then(|mut connection| {
                 log_intent_result(&mut connection, message, intent_result, corrected)
                     .map_err(|error|
-                        error!(target: "dungeon-helper", "Error logging intent result. Message ID: {}; Error: {}", message.id, error)
+                        error!(target: "scum-bot", "Error logging intent result. Message ID: {}; Error: {}", message.id, error)
                     )
             })
             .unwrap_or(())
@@ -493,7 +493,7 @@ impl Handler {
             .ok()
             .and_then(|connection|
                 Channel::get(&connection, channel_id)
-                    .map_err(|error| error!(target: "dungeon-helper", "Error retrieving channel: Channel ID: {}; Error: {}", channel_id.to_string(), error))
+                    .map_err(|error| error!(target: "scum-bot", "Error retrieving channel: Channel ID: {}; Error: {}", channel_id.to_string(), error))
                     .ok()
                     .and_then(identity)
             )
@@ -509,7 +509,7 @@ impl Handler {
 
 impl EventHandler for Handler {
     fn message(&self, ctx: Context, message: Message) {
-        info!(target: "dungeon-helper", "Received message. Message ID: {}; Content: {}", message.id, message.content.escape_debug());
+        info!(target: "scum-bot", "Received message. Message ID: {}; Content: {}", message.id, message.content.escape_debug());
         let action = if message.is_own(&ctx.cache) {
             // Don't respond to our own messages, this may cause an infinite loop
             Action::IgnoreOwnMessage
@@ -532,19 +532,19 @@ impl EventHandler for Handler {
             if let Some(command_result) = command_result.as_ref() {
                 match command_result {
                     Ok(CommandResult::NaturalLanguage(Ok(command), _, corrected)) => {
-                        info!(target: "dungeon-helper", "Parsed natural language command successfully. Message ID: {}; Command: {:?}; Corrected Message: {}", message.id, command, corrected.as_deref().unwrap_or(""))
+                        info!(target: "scum-bot", "Parsed natural language command successfully. Message ID: {}; Command: {:?}; Corrected Message: {}", message.id, command, corrected.as_deref().unwrap_or(""))
                     }
                     Ok(CommandResult::NaturalLanguage(Err(error), _, corrected)) => {
-                        info!(target: "dungeon-helper", "Error parsing natural language command. Message ID: {}; Corrected Message: {}; Error: {:}", message.id, corrected.as_deref().unwrap_or(""), error)
+                        info!(target: "scum-bot", "Error parsing natural language command. Message ID: {}; Corrected Message: {}; Error: {:}", message.id, corrected.as_deref().unwrap_or(""), error)
                     }
                     Ok(CommandResult::Shorthand(Err(error))) => {
-                        info!(target: "dungeon-helper", "Error parsing shorthand command. Message ID: {}; Command: {:?}", message.id, error)
+                        info!(target: "scum-bot", "Error parsing shorthand command. Message ID: {}; Command: {:?}", message.id, error)
                     }
                     Ok(CommandResult::Shorthand(Ok(command))) => {
-                        info!(target: "dungeon-helper", "Parsed shorthand command successfully. Message ID: {}; Command: {:?}", message.id, command)
+                        info!(target: "scum-bot", "Parsed shorthand command successfully. Message ID: {}; Command: {:?}", message.id, command)
                     }
                     Err(error) => {
-                        info!(target: "dungeon-helper", "Error parsing command. Message ID: {}; Error: {}", message.id, error)
+                        info!(target: "scum-bot", "Error parsing command. Message ID: {}; Error: {}", message.id, error)
                     }
                 }
             };
@@ -552,27 +552,27 @@ impl EventHandler for Handler {
         };
         match action {
             Action::IgnoreChannelDisabled => {
-                info!(target: "dungeon-helper", "Ignoring command because Dungeon Helper is disabled in current channel. Message ID: {}", message.id);
+                info!(target: "scum-bot", "Ignoring command because Scum Bot is disabled in current channel. Message ID: {}", message.id);
             }
             Action::IgnoreCommandMissing => {
-                info!(target: "dungeon-helper", "Ignoring message because it contains no command. Message ID: {}", message.id);
+                info!(target: "scum-bot", "Ignoring message because it contains no command. Message ID: {}", message.id);
             }
             Action::IgnoreOwnMessage => {
-                info!(target: "dungeon-helper", "Ignoring message because it was sent by us. Message ID: {}", message.id);
+                info!(target: "scum-bot", "Ignoring message because it was sent by us. Message ID: {}", message.id);
             }
             Action::Respond(response) => {
                 if let Response::Error(error) = &response {
-                    error!(target: "dungeon-helper", "Error processing command. Message ID: {}; Error = {:?}", message.id, error);
+                    error!(target: "scum-bot", "Error processing command. Message ID: {}; Error = {:?}", message.id, error);
                 };
                 let result = message
                     .channel_id
                     .say(&ctx.http, response.render(message.author.id, message.id));
                 match result {
                     Ok(sent_message) => {
-                        info!(target: "dungeon-helper", "Sent message. Message ID: {}; Sent Message ID: {}; Content: {}", message.id, sent_message.id, sent_message.content.escape_debug())
+                        info!(target: "scum-bot", "Sent message. Message ID: {}; Sent Message ID: {}; Content: {}", message.id, sent_message.id, sent_message.content.escape_debug())
                     }
                     Err(error) => {
-                        error!(target: "dungeon-helper", "Error sending message. Message ID: {}; Error: {:?}", message.id, error)
+                        error!(target: "scum-bot", "Error sending message. Message ID: {}; Error: {:?}", message.id, error)
                     }
                 }
             }
@@ -585,6 +585,6 @@ impl EventHandler for Handler {
             .write()
             .expect("RwLock for bot_id has been poisoned");
         *bot_id = Some(ready.user.id.to_string());
-        info!(target: "dungeon-helper", "{} is connected!", ready.user.name);
+        info!(target: "scum-bot", "{} is connected!", ready.user.name);
     }
 }

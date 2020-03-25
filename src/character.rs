@@ -6,7 +6,7 @@ use serenity::model::id::{ChannelId, UserId};
 use std::error;
 use std::fmt;
 
-/// A character in a Dungeons and Dragons campaign.
+/// A character in a Scum and Villainy campaign.
 ///
 /// The character has a number of base abilities and proficiencies, from which ability and
 /// skill modifiers are calculated.

@@ -3,10 +3,10 @@ FROM debian:buster
 RUN apt-get update \
  && apt-get install -y sqlite3 libsqlite3-dev
 
-COPY ./target/release/dungeon_helper /opt/dungeon-helper/bin/dungeon_helper
+COPY ./target/release/scum_bot /opt/scum-bot/bin/scum_bot
 
-ADD ./config/sql/* /opt/dungeon-helper/share/sql/
+ADD ./config/sql/* /opt/scum-bot/share/sql/
 
-ADD ./config/bin/* /opt/dungeon-helper/bin/
+ADD ./config/bin/* /opt/scum-bot/bin/
 
-CMD ["/opt/dungeon-helper/bin/entrypoint.sh"]
+CMD ["/opt/scum-bot/bin/entrypoint.sh"]

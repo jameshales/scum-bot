@@ -1,10 +1,10 @@
-# Dungeon Helper
+# Scum Bot
 
-🎲 A Discord bot for performing Dungeons and Dragons 5th Edition dice rolls.
+🎲 A Discord bot for performing Scum and Villainy dice rolls.
 
 ## Usage
 
-See [Command Reference](./COMMANDS.md) for examples of natural language commands supported by Dungeon Helper.
+See [Command Reference](./COMMANDS.md) for examples of natural language commands supported by Scum Bot
 
 ## Installation
 
@@ -47,11 +47,11 @@ In a local command-line environment:
   - `MODEL_PATH` to the path of a trained Snips NLU model.
   - `DICTIONARY_PATH` to the path of a [SymSpell](https://github.com/reneklacan/symspell) frequency dictionary.
   - `BIGRAM_DICTIONARY_PATH` to the path of a SymSpell bigram frequency dictionary.
-  - `RUST_LOG=dungeon_helper=info` to enable logging.
+  - `RUST_LOG=scum_bot=info` to enable logging.
 6.  Run the application.
 
     ```
-    ./target/release/dungeon_helper
+    ./target/release/scum_bot
     ```
 
 ### Interact with the bot

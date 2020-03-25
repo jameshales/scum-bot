@@ -4,11 +4,11 @@ mkdir -p $(dirname "$DATABASE_PATH")
 
 if [ ! -f "$DATABASE_PATH" ]; then
   db_path=$(mktemp -d)
-  cat /opt/dungeon-helper/share/sql/*.sql | sqlite3 $db_path/dungeon-helper.db
-  mv -n $db_path/dungeon-helper.db "$DATABASE_PATH"
+  cat /opt/scum-bot/share/sql/*.sql | sqlite3 $db_path/scum-bot.db
+  mv -n $db_path/scum-bot.db "$DATABASE_PATH"
   rmdir $db_path
 fi
 
-cd /opt/dungeon-helper/var/
+cd /opt/scum-bot/var/
 
-exec /opt/dungeon-helper/bin/dungeon_helper
+exec /opt/scum-bot/bin/scum_bot

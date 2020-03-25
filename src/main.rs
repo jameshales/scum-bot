@@ -59,6 +59,6 @@ fn main() {
     let mut client = Client::new(&token, handler).expect("Error creating Discord client");
 
     if let Err(why) = client.start() {
-        error!(target: "dungeon-helper", "Client error: {:?}", why);
+        error!(target: "scum-bot", "Client error: {:?}", why);
     }
 }

@@ -13,4 +13,4 @@
 **/*.rs.bk
 
 # SQLite database
-dungeon-helper.db
+scum-bot.db

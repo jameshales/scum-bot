@@ -4,18 +4,18 @@ RUN apt-get update \
  && apt-get install -y clang libclang-dev libsqlite3-dev llvm-dev \
  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /dungeon-helper/
+WORKDIR /scum-bot/
 
-RUN mkdir -p /dungeon-helper/src/ \
- && echo 'fn main() {}' > /dungeon-helper/src/main.rs
+RUN mkdir -p /scum-bot/src/ \
+ && echo 'fn main() {}' > /scum-bot/src/main.rs
 
-ADD ./Cargo.toml ./Cargo.lock /dungeon-helper/
+ADD ./Cargo.toml ./Cargo.lock /scum-bot/
 
 RUN cargo build --release
 
-ADD ./src/ /dungeon-helper/src/
+ADD ./src/ /scum-bot/src/
 
-RUN touch /dungeon-helper/src/main.rs \
+RUN touch /scum-bot/src/main.rs \
  && cargo build --release
 
 FROM debian:buster
@@ -23,10 +23,10 @@ FROM debian:buster
 RUN apt-get update \
  && apt-get install -y sqlite3 libsqlite3-dev
 
-COPY --from=build /dungeon-helper/target/release/dungeon_helper /opt/dungeon-helper/bin/dungeon_helper
+COPY --from=build /scum-bot/target/release/scum_bot /opt/scum-bot/bin/scum_bot
 
-ADD ./config/sql/* /opt/dungeon-helper/share/sql/
+ADD ./config/sql/* /opt/scum-bot/share/sql/
 
-ADD ./config/bin/* /opt/dungeon-helper/bin/
+ADD ./config/bin/* /opt/scum-bot/bin/
 
-CMD ["/opt/dungeon-helper/bin/entrypoint.sh"]
+CMD ["/opt/scum-bot/bin/entrypoint.sh"]
