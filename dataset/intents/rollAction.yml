@@ -3,6 +3,8 @@ name: rollAction
 slots:
   - name: action
     entity: action
+  - name: bonus
+    entity: snips/number
 utterances:
   - "[action] roll."
   - "[action]."
@@ -64,3 +66,85 @@ utterances:
   - Will you roll [action]?
   - Would you kindly throw me [action]?
   - Would you throw me [action]?
+  - "[action] roll plus [bonus] bonus dice."
+  - "[action] plus [bonus] bonus dice."
+  - Can you do a [action] roll plus [bonus] bonus dice?
+  - Can you please throw me [action] plus [bonus] bonus dice please?
+  - Can you please throw me [action] plus [bonus] bonus dice?
+  - Can you roll [action] plus [bonus] bonus dice for me?
+  - Can you roll [action] plus [bonus] bonus dice?
+  - Can you throw me [action] plus [bonus] bonus dice please?
+  - Can you throw me [action] plus [bonus] bonus dice?
+  - Roll [action] plus [bonus] bonus dice.
+  - Could you throw [action] plus [bonus] bonus dice for me please?
+  - Do a [action] roll plus [bonus] bonus dice.
+  - Do a [action] roll plus [bonus] bonus dice.
+  - Do a [action] action roll plus [bonus] bonus dice.
+  - Do a action roll for [action] plus [bonus] bonus dice.
+  - I need you to throw [action] plus [bonus] bonus dice.
+  - I need you to throw me [action] plus [bonus] bonus dice.
+  - Perform a [action] roll plus [bonus] bonus dice.
+  - Perform an action roll plus [action] and [bonus] bonus dice.
+  - Please can you throw me [action] plus [bonus] bonus dice?
+  - Please do a [action] roll plus [bonus] bonus dice.
+  - Please throw a [action] action roll plus [bonus] bonus dice.
+  - Please throw me [action] plus [bonus] bonus dice.
+  - Roll [action] plus [bonus] bonus dice.
+  - Roll a [action] roll plus [bonus] bonus dice.
+  - Roll a action roll for [action] plus [bonus] bonus dice.
+  - Roll an action roll for [action] plus [bonus] bonus dice.
+  - Roll for [action] plus [bonus] bonus dice.
+  - Action roll [action] plus [bonus] bonus dice.
+  - Throw [action] plus [bonus] bonus dice.
+  - Throw a [action] roll plus [bonus] bonus dice.
+  - Throw a [action] action roll plus [bonus] bonus dice.
+  - Throw for [action] plus [bonus] bonus dice.
+  - Time to roll a [action] roll plus [bonus] bonus dice.
+  - Time to roll a [action] action roll plus [bonus] bonus dice.
+  - Time to roll for [action] plus [bonus] bonus dice.
+  - Time to roll with [action] plus [bonus] bonus dice.
+  - Will you roll [action] plus [bonus] bonus dice for me?
+  - Will you roll [action] plus [bonus] bonus dice?
+  - Would you kindly throw me [action] plus [bonus] bonus dice?
+  - Would you throw me [action] plus [bonus] bonus dice?
+  - "[action] roll and [bonus] bonus dice."
+  - "[action] and [bonus] bonus dice."
+  - Can you do a [action] roll and [bonus] bonus dice?
+  - Can you please throw me [action] and [bonus] bonus dice please?
+  - Can you please throw me [action] and [bonus] bonus dice?
+  - Can you roll [action] and [bonus] bonus dice for me?
+  - Can you roll [action] and [bonus] bonus dice?
+  - Can you throw me [action] and [bonus] bonus dice please?
+  - Can you throw me [action] and [bonus] bonus dice?
+  - Roll [action] and [bonus] bonus dice.
+  - Could you throw [action] and [bonus] bonus dice for me please?
+  - Do a [action] roll and [bonus] bonus dice.
+  - Do a [action] roll and [bonus] bonus dice.
+  - Do a [action] action roll and [bonus] bonus dice.
+  - Do a action roll for [action] and [bonus] bonus dice.
+  - I need you to throw [action] and [bonus] bonus dice.
+  - I need you to throw me [action] and [bonus] bonus dice.
+  - Perform a [action] roll and [bonus] bonus dice.
+  - Perform an action roll and [action] and [bonus] bonus dice.
+  - Please can you throw me [action] and [bonus] bonus dice?
+  - Please do a [action] roll and [bonus] bonus dice.
+  - Please throw a [action] action roll and [bonus] bonus dice.
+  - Please throw me [action] and [bonus] bonus dice.
+  - Roll [action] and [bonus] bonus dice.
+  - Roll a [action] roll and [bonus] bonus dice.
+  - Roll a action roll for [action] and [bonus] bonus dice.
+  - Roll an action roll for [action] and [bonus] bonus dice.
+  - Roll for [action] and [bonus] bonus dice.
+  - Action roll [action] and [bonus] bonus dice.
+  - Throw [action] and [bonus] bonus dice.
+  - Throw a [action] roll and [bonus] bonus dice.
+  - Throw a [action] action roll and [bonus] bonus dice.
+  - Throw for [action] and [bonus] bonus dice.
+  - Time to roll a [action] roll and [bonus] bonus dice.
+  - Time to roll a [action] action roll and [bonus] bonus dice.
+  - Time to roll for [action] and [bonus] bonus dice.
+  - Time to roll with [action] and [bonus] bonus dice.
+  - Will you roll [action] and [bonus] bonus dice for me?
+  - Will you roll [action] and [bonus] bonus dice?
+  - Would you kindly throw me [action] and [bonus] bonus dice?
+  - Would you throw me [action] and [bonus] bonus dice?

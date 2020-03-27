@@ -41,9 +41,10 @@ fn parse_roll_resistance(slots: &[Slot]) -> Result<Command, Error> {
 
 fn parse_roll_action(slots: &[Slot]) -> Result<Command, Error> {
     let action = extract_action_slot(slots);
+    let bonus = extract_usize_slot_value(slots, "bonus").unwrap_or(0);
     action.ok_or(Error::RollActionMissingAction).map(|action| {
         let roll = CharacterRoll {
-            check: Check::Action(action),
+            check: Check::Action(action, bonus),
         };
         Command::CharacterRoll(roll)
     })
